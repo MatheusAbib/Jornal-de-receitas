@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jornal de Receitas</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Variáveis e reset */
+    :root {
+      --main-bg-color: #f8f5f0;
+      --header-color: #a52a2a;
+      --accent-color: #d4af37;
+      --secondary-accent: #c19b76;
+      --text-color: #333;
+      --light-text: #777;
+      --border-color: #8b4513;
+      --card-bg: #fefdf9;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Playfair Display', 'Georgia', serif;
+      background-color: var(--main-bg-color);
+      color: var(--text-color);
+      line-height: 1.7;
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+      background-image: 
+        url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h100v100H0z' fill='%23f8f5f0'/%3E%3Cpath d='M0 0l100 100M100 0L0 100' stroke='%23e8e1d3' stroke-width='0.5'/%3E%3C/svg%3E");
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(rgba(255, 255, 255, 0.7) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(255, 255, 255, 0.7) 1px, transparent 1px);
+      background-size: 20px 20px;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    /* Cabeçalho estilo jornal premium */
+    .newspaper-header {
+      border-bottom: 3px double var(--border-color);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .newspaper-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 4.5rem;
+      font-weight: 800;
+      color: var(--header-color);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin: 15px 0 5px;
+      line-height: 1.1;
+      position: relative;
+      display: inline-block;
+      padding: 0 20px;
+    }
+    
+    .newspaper-title::before,
+    .newspaper-title::after {
+      content: "✦";
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent-color);
+      font-size: 2rem;
+    }
+    
+    .newspaper-title::before {
+      left: -30px;
+    }
+    
+    .newspaper-title::after {
+      right: -30px;
+    }
+    
+    .newspaper-subtitle {
+      font-style: italic;
+      font-size: 1.4rem;
+      color: var(--light-text);
+      margin: 10px 0;
+      letter-spacing: 1px;
+      font-weight: 400;
+    }
+    
+    .newspaper-date {
+      font-size: 1rem;
+      color: var(--light-text);
+      margin-top: 10px;
+      font-weight: 500;
+    }
+    
+    .newspaper-price {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--header-color);
+      background: var(--accent-color);
+      padding: 8px 15px;
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+    }
+    
+    .newspaper-volume {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--header-color);
+      background: rgba(255, 255, 255, 0.8);
+      padding: 8px 15px;
+      border-radius: 30px;
+      border: 1px solid var(--border-color);
+    }
+    
+    /* Navegação melhorada */
+    .nav-links {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      margin: 40px 0;
+      flex-wrap: wrap;
+    }
+    
+    .nav-links a {
+      text-decoration: none;
+      color: var(--header-color);
+      font-weight: 600;
+      padding: 14px 30px;
+      border: 2px solid var(--header-color);
+      border-radius: 50px;
+      transition: var(--transition);
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .nav-links a i {
+      font-size: 1.2rem;
+    }
+    
+    .nav-links a:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 100%;
+      background: var(--header-color);
+      transition: var(--transition);
+      z-index: -1;
+      border-radius: 50px;
+    }
+    
+    .nav-links a:hover:before {
+      width: 100%;
+    }
+    
+    .nav-links a:hover {
+      color: #fff;
+      box-shadow: 0 5px 15px rgba(165, 42, 42, 0.3);
+    }
+    
+    /* Carrossel modernizado */
+    .carousel-container {
+      position: relative;
+      margin: 40px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      height: 500px;
+    }
+    
+    .carousel {
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+    }
+    
+    .carousel-inner {
+      display: flex;
+      transition: transform 0.6s ease-in-out;
+      height: 100%;
+    }
+    
+    .carousel-item {
+      min-width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    
+    .carousel-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    
+    .carousel-item:hover img {
+      transform: scale(1.05);
+    }
+    
+    .carousel-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .carousel-caption h3 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: var(--accent-color);
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    }
+    
+    .carousel-caption p {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .carousel-controls {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      transform: translateY(-50%);
+      padding: 0 20px;
+      z-index: 10;
+    }
+    
+    .carousel-control {
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--header-color);
+      border: none;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      font-size: 1.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .carousel-control:hover {
+      background: var(--header-color);
+      color: white;
+      transform: scale(1.1);
+    }
+    
+    .carousel-indicators {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      z-index: 10;
+    }
+    
+    .carousel-indicator {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .carousel-indicator.active {
+      background: var(--accent-color);
+      transform: scale(1.2);
+    }
+    
+    /* Notícias em destaque */
+    .news-highlights {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      margin: 50px 0;
+    }
+    
+    .news-item {
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      border-left: 4px solid var(--accent-color);
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+    }
+    
+    .news-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .news-icon {
+      font-size: 1.8rem;
+      color: var(--accent-color);
+      flex-shrink: 0;
+    }
+    
+    .news-content {
+      flex: 1;
+    }
+    
+    /* Grid de receitas moderno */
+    .receitas {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 35px;
+      margin: 50px 0;
+    }
+    
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card-image {
+      height: 240px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    
+    .card:hover .card-image img {
+      transform: scale(1.1);
+    }
+    
+    .card-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: var(--accent-color);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .card-content {
+      padding: 25px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .card h2 {
+      font-size: 1.8rem;
+      color: var(--header-color);
+      margin-bottom: 15px;
+      line-height: 1.3;
+      font-weight: 700;
+    }
+    
+    .card p {
+      color: var(--light-text);
+      margin-bottom: 20px;
+      flex: 1;
+    }
+    
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+    }
+    
+    .card-meta span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--light-text);
+    }
+    
+    .card-meta i {
+      color: var(--accent-color);
+    }
+    
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+    }
+    
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--header-color);
+      font-weight: 600;
+      padding: 10px 20px;
+      border: 2px solid var(--header-color);
+      border-radius: 50px;
+      transition: var(--transition);
+    }
+    
+    .card-link:hover {
+      background: var(--header-color);
+      color: white;
+      box-shadow: 0 5px 15px rgba(165, 42, 42, 0.3);
+    }
+    
+    .card-favorite {
+      background: none;
+      border: none;
+      color: #ccc;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .card-favorite:hover,
+    .card-favorite.active {
+      color: var(--accent-color);
+    }
+    
+    /* Classificados modernos */
+    .classifieds {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 30px;
+      margin: 50px 0;
+    }
+    
+    .classified-item {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      text-align: center;
+    }
+    
+    .classified-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .classified-item img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    
+    .classified-content {
+      padding: 20px;
+    }
+    
+    .classified-item h3 {
+      font-size: 1.4rem;
+      color: var(--header-color);
+      margin-bottom: 10px;
+    }
+    
+    .classified-item p {
+      color: var(--light-text);
+    }
+    
+    /* Anúncio estilizado */
+    .advertisement {
+      background: linear-gradient(135deg, var(--header-color), #8b0000);
+      color: white;
+      padding: 40px;
+      border-radius: 12px;
+      text-align: center;
+      margin: 50px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .advertisement::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      transform: rotate(30deg);
+    }
+    
+    .advertisement h2 {
+      font-size: 2.2rem;
+      margin-bottom: 15px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .advertisement p {
+      font-size: 1.2rem;
+      max-width: 700px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .advertisement .btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 30px;
+      background: var(--accent-color);
+      color: var(--header-color);
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: 50px;
+      transition: var(--transition);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .advertisement .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Rodapé moderno */
+    .newspaper-footer {
+      text-align: center;
+      margin-top: 80px;
+      padding-top: 40px;
+      border-top: 2px solid var(--border-color);
+      color: var(--light-text);
+      position: relative;
+    }
+    
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 40px;
+      text-align: left;
+      margin-bottom: 40px;
+    }
+    
+    .footer-column h3 {
+      color: var(--header-color);
+      margin-bottom: 20px;
+      font-size: 1.4rem;
+    }
+    
+    .footer-column ul {
+      list-style: none;
+    }
+    
+    .footer-column ul li {
+      margin-bottom: 12px;
+    }
+    
+    .footer-column a {
+      color: var(--light-text);
+      text-decoration: none;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .footer-column a:hover {
+      color: var(--header-color);
+    }
+    
+    .footer-bottom {
+      padding: 20px 0;
+      border-top: 1px solid #eee;
+    }
+    
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    
+    .social-links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 45px;
+      height: 45px;
+      background: var(--header-color);
+      color: white;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      transition: var(--transition);
+    }
+    
+    .social-links a:hover {
+      transform: translateY(-5px);
+      background: var(--accent-color);
+      color: var(--header-color);
+    }
+    
+    /* Animações */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .card, .news-item, .classified-item {
+      animation: fadeIn 0.6s ease forwards;
+    }
+    
+    .card:nth-child(2) { animation-delay: 0.1s; }
+    .card:nth-child(3) { animation-delay: 0.2s; }
+    .card:nth-child(4) { animation-delay: 0.3s; }
+    .card:nth-child(5) { animation-delay: 0.4s; }
+    .card:nth-child(6) { animation-delay: 0.5s; }
+    
+    /* Efeito de flutuação */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .advertisement {
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    /* Responsividade aprimorada */
+    @media (max-width: 1200px) {
+      .newspaper-title {
+        font-size: 3.8rem;
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .newspaper-title {
+        font-size: 3.2rem;
+      }
+      
+      .carousel-container {
+        height: 400px;
+      }
+      
+      .carousel-caption h3 {
+        font-size: 2rem;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      
+      .newspaper-title {
+        font-size: 2.5rem;
+        padding: 0 15px;
+      }
+      
+      .newspaper-title::before,
+      .newspaper-title::after {
+        font-size: 1.5rem;
+      }
+      
+      .newspaper-title::before {
+        left: -20px;
+      }
+      
+      .newspaper-title::after {
+        right: -20px;
+      }
+      
+      .newspaper-price,
+      .newspaper-volume {
+        position: static;
+        display: inline-block;
+        margin: 10px 5px;
+      }
+      
+      .nav-links a {
+        padding: 12px 20px;
+        font-size: 1rem;
+      }
+      
+      .carousel-container {
+        height: 300px;
+      }
+      
+      .carousel-control {
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+      }
+      
+      .carousel-caption {
+        padding: 15px;
+      }
+      
+      .carousel-caption h3 {
+        font-size: 1.6rem;
+      }
+      
+      .carousel-caption p {
+        font-size: 1rem;
+      }
+      
+      .receitas {
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
+      
+      .news-highlights {
+        grid-template-columns: 1fr;
+      }
+      
+      .classifieds {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .newspaper-title {
+        font-size: 2rem;
+      }
+      
+      .newspaper-subtitle {
+        font-size: 1.1rem;
+      }
+      
+      .nav-links {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .nav-links a {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+      }
+      
+      .carousel-container {
+        height: 250px;
+      }
+      
+      .carousel-control {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="newspaper-header">
+    <div class="newspaper-volume">Edição #12</div>
+    <div class="newspaper-price">R$5,00</div>
+    <h1 class="newspaper-title">Jornal de Receitas</h1>
+    <p class="newspaper-subtitle">Delícias do dia a dia para todos os gostos</p>
+    <p class="newspaper-date">29 de Agosto de 2025</p>
+  </header>
+
+  <nav class="nav-links">
+    <a href="/pendentes"><i class="fas fa-clock"></i> Receitas Pendentes</a>
+    <a href="/nova"><i class="fas fa-plus-circle"></i> Nova Receita</a>
+  </nav>
+
+  <div class="carousel-container">
+    <div class="carousel">
+      <div class="carousel-inner">
+        <div class="carousel-item">
+          <img src="/uploads/exemplo1.jpg" alt="Bolo de Chocolate">
+          <div class="carousel-caption">
+            <h3>Bolo de Chocolate</h3>
+            <p>Uma receita incrível para os amantes de chocolate</p>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <img src="/uploads/exemplo2.jpg" alt="Salada Tropical">
+          <div class="carousel-caption">
+            <h3>Salada Tropical</h3>
+            <p>Refrescante e cheia de nutrientes para o verão</p>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <img src="/uploads/exemplo3.jpg" alt="Frango Assado">
+          <div class="carousel-caption">
+            <h3>Frango Assado</h3>
+            <p>Perfeito para um jantar em família</p>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-controls">
+        <button class="carousel-control prev"><i class="fas fa-chevron-left"></i></button>
+        <button class="carousel-control next"><i class="fas fa-chevron-right"></i></button>
+      </div>
+      <div class="carousel-indicators">
+        <div class="carousel-indicator active"></div>
+        <div class="carousel-indicator"></div>
+        <div class="carousel-indicator"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="news-highlights">
+    <div class="news-item">
+      <div class="news-icon">📢</div>
+      <div class="news-content">Nova receita enviada: Torta de Limão</div>
+    </div>
+    <div class="news-item">
+      <div class="news-icon">🌟</div>
+      <div class="news-content">Receita em destaque: Lasanha de Berinjela</div>
+    </div>
+    <div class="news-item">
+      <div class="news-icon">🍽️</div>
+      <div class="news-content">Receita do dia: Brownie Fofinho</div>
+    </div>
+    <div class="news-item">
+      <div class="news-icon">👩‍🍳</div>
+      <div class="news-content">Receita clássica: Panqueca Americana</div>
+    </div>
+  </div>
+
+  <div class="receitas">
+    <div class="card" th:each="r : ${receitas}">
+      <div class="card-image">
+        <img th:if="${r.imagem != null}" th:src="@{'/uploads/' + ${r.imagem}}" alt="Imagem da receita">
+        <img th:if="${r.imagem == null}" src="/default-image.jpg" alt="Sem imagem">
+        <div class="card-badge">NOVO</div>
+      </div>
+      <div class="card-content">
+        <h2 th:text="${r.titulo}">Título da Receita</h2>
+        <div class="card-meta">
+          <span><i class="fas fa-clock"></i> <span th:text="${r.tempoPreparo}">30 min</span></span>
+          <span><i class="fas fa-user"></i> 4 porções</span>
+        </div>
+        <p>Experimente essa receita deliciosa e compartilhe com amigos e familiares. Perfeita para ocasiões especiais!</p>
+        <div class="card-actions">
+          <a th:href="@{/detalhe/{id}(id=${r.id})}" class="card-link">Ver receita <i class="fas fa-arrow-right"></i></a>
+          <button class="card-favorite"><i class="far fa-heart"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="classifieds">
+    <div class="classified-item">
+      <img src="/uploads/exemplo4.jpg" alt="Espaguete ao Pesto">
+      <div class="classified-content">
+        <h3>Espaguete ao Pesto</h3>
+        <p>Tempo: 25 min</p>
+      </div>
+    </div>
+    <div class="classified-item">
+      <img src="/uploads/exemplo5.jpg" alt="Sopa de Abóbora">
+      <div class="classified-content">
+        <h3>Sopa de Abóbora</h3>
+        <p>Tempo: 40 min</p>
+      </div>
+    </div>
+    <div class="classified-item">
+      <img src="/uploads/exemplo6.jpg" alt="Bolinhos de Chuva">
+      <div class="classified-content">
+        <h3>Bolinhos de Chuva</h3>
+        <p>Tempo: 20 min</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="advertisement">
+    <h2>Ofertas Especiais de Utensílios!</h2>
+    <p>Aproveite nossas ofertas semanais de utensílios de cozinha com até 40% de desconto!</p>
+    <a href="#" class="btn">Ver Ofertas</a>
+  </div>
+
+  <footer class="newspaper-footer">
+    <div class="footer-content">
+      <div class="footer-column">
+        <h3>Jornal de Receitas</h3>
+        <p>O seu destino para encontrar as melhores receitas caseiras e dicas culinárias.</p>
+      </div>
+      <div class="footer-column">
+        <h3>Links Rápidos</h3>
+        <ul>
+          <li><a href="#"><i class="fas fa-utensils"></i> Receitas</a></li>
+          <li><a href="#"><i class="fas fa-book"></i> Categorias</a></li>
+          <li><a href="#"><i class="fas fa-star"></i> Destaques</a></li>
+          <li><a href="#"><i class="fas fa-question-circle"></i> Sobre Nós</a></li>
+        </ul>
+      </div>
+      <div class="footer-column">
+        <h3>Contato</h3>
+        <ul>
+          <li><a href="#"><i class="fas fa-envelope"></i> contato@jornaldereceitas.com</a></li>
+          <li><a href="#"><i class="fas fa-phone"></i> (11) 9999-9999</a></li>
+          <li><a href="#"><i class="fas fa-map-marker-alt"></i> São Paulo, Brasil</a></li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="social-links">
+      <a href="#"><i class="fab fa-facebook-f"></i></a>
+      <a href="#"><i class="fab fa-instagram"></i></a>
+      <a href="#"><i class="fab fa-pinterest"></i></a>
+      <a href="#"><i class="fab fa-youtube"></i></a>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>© 2025 Jornal de Receitas - Todos os direitos reservados</p>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Carrossel funcionalidade
+      const carousel = document.querySelector('.carousel-inner');
+      const items = document.querySelectorAll('.carousel-item');
+      const prevBtn = document.querySelector('.carousel-control.prev');
+      const nextBtn = document.querySelector('.carousel-control.next');
+      const indicators = document.querySelectorAll('.carousel-indicator');
+      
+      let currentIndex = 0;
+      const totalItems = items.length;
+      
+      // Função para atualizar o carrossel
+      function updateCarousel() {
+        carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+        
+        // Atualizar indicadores
+        indicators.forEach((indicator, index) => {
+          if (index === currentIndex) {
+            indicator.classList.add('active');
+          } else {
+            indicator.classList.remove('active');
+          }
+        });
+      }
+      
+      // Avançar para o próximo slide
+      function nextSlide() {
+        currentIndex = (currentIndex + 1) % totalItems;
+        updateCarousel();
+      }
+      
+      // Voltar para o slide anterior
+      function prevSlide() {
+        currentIndex = (currentIndex - 1 + totalItems) % totalItems;
+        updateCarousel();
+      }
+      
+      // Event listeners para os botões
+      nextBtn.addEventListener('click', nextSlide);
+      prevBtn.addEventListener('click', prevSlide);
+      
+      // Event listeners para os indicadores
+      indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', () => {
+          currentIndex = index;
+          updateCarousel();
+        });
+      });
+      
+      // Auto-avanço do carrossel
+      let carouselInterval = setInterval(nextSlide, 5000);
+      
+      // Pausar auto-avanço quando o mouse estiver sobre o carrossel
+      const carouselContainer = document.querySelector('.carousel-container');
+      carouselContainer.addEventListener('mouseenter', () => {
+        clearInterval(carouselInterval);
+      });
+      
+      carouselContainer.addEventListener('mouseleave', () => {
+        carouselInterval = setInterval(nextSlide, 5000);
+      });
+      
+      // Funcionalidade de favoritos
+      const favoriteButtons = document.querySelectorAll('.card-favorite');
+      
+      favoriteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          this.classList.toggle('active');
+          const icon = this.querySelector('i');
+          
+          if (this.classList.contains('active')) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+          } else {
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+          }
+        });
+      });
+      
+      const titleElement = document.querySelector('.newspaper-title');
+      const originalTitle = titleElement.textContent;
+      titleElement.textContent = '';
+      
+      let charIndex = 0;
+      function typeTitle() {
+        if (charIndex < originalTitle.length) {
+          titleElement.textContent += originalTitle.charAt(charIndex);
+          charIndex++;
+          setTimeout(typeTitle, 100);
+        }
+      }
+      
+      typeTitle();
+    });
+  </script>
+</body>
+</html>

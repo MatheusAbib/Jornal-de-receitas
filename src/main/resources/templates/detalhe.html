@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${receita.titulo}">Detalhes da Receita</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h1 th:text="${receita.titulo}">Título da Receita</h1>
+
+  <!-- Exibe a imagem da receita ou uma padrão caso não exista -->
+  <div>
+    <img th:if="${receita.imagem != null}" th:src="@{'/uploads/' + ${receita.imagem}}" alt="Imagem da receita">
+    <img th:if="${receita.imagem == null}" src="/default-image.jpg" alt="Sem imagem">
+  </div>
+
+  <p><strong>Tempo de Preparo:</strong> <span th:text="${receita.tempoPreparo}">xx minutos</span></p>
+
+  <h3>Ingredientes:</h3>
+  <ul>
+    <li th:each="ingrediente : ${receita.ingredientes}">
+      <label>
+        <input type="checkbox">
+        <span th:text="${ingrediente}">Ingrediente</span>
+      </label>
+    </li>
+  </ul>
+
+  <h3>Modo de Preparo:</h3>
+  <ol>
+    <li th:each="passo : ${receita.modoPreparo}" th:text="${passo}">Passo</li>
+  </ol>
+
+  <!-- Botões de navegação -->
+  <div style="margin-top:20px;">
+    <a href="/" style="margin-right:10px;">Voltar para Receitas Aprovadas</a>
+    <a href="/pendentes" th:if="${!receita.aprovada}">Voltar para Pendentes</a>
+  </div>
+</body>
+</html>
